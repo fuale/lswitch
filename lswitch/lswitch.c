@@ -9,12 +9,20 @@ HHOOK	g_khook;
 HANDLE  g_hEvent;
 UINT	g_key=VK_APPS;
 
+static BOOL shift_pressed = FALSE;
+
 LRESULT CALLBACK KbdHook(int nCode,WPARAM wParam,LPARAM lParam) {
 	if (nCode<0)
 		return CallNextHookEx(g_khook,nCode,wParam,lParam);
 	if (nCode==HC_ACTION) {
 		KBDLLHOOKSTRUCT   *ks=(KBDLLHOOKSTRUCT*)lParam;
+		if (ks->vkCode == VK_LSHIFT) {
+			shift_pressed = wParam == WM_KEYDOWN;
+		}
 		if (ks->vkCode==g_key) {
+			if (shift_pressed) {
+				return CallNextHookEx(g_khook, nCode, wParam, lParam);
+			}
 			if (wParam==WM_KEYDOWN) {
 				HWND hWnd=GetForegroundWindow();
 				if (hWnd)
